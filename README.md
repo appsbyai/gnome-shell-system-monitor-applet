@@ -1,159 +1,248 @@
-## GNOME Shell system monitor extension
+# GNOME Shell System Monitor NEXT Extension
 
-> [!IMPORTANT]
-> This repository has been deprecated in favour of this fork: https://github.com/mgalgs/gnome-shell-system-monitor-next-applet
->
-> See there for support beyond GNOME Shell 40
+![Extension uploader](https://github.com/mgalgs/gnome-shell-system-monitor-next-applet/workflows/Extension%20uploader/badge.svg)
 
-[![Build Status](https://travis-ci.com/paradoxxxzero/gnome-shell-system-monitor-applet.svg?branch=master)](https://travis-ci.com/paradoxxxzero/gnome-shell-system-monitor-applet)
+A GNOME Shell extension that displays system resource usage in the top panel.
 
-![screenshot-small](http://i.imgur.com/ka9OA.png)
+![Standard View](screenshots/standard.png)
 
-![screenshot-mid](http://i.imgur.com/mmRTu.png)
+## Table of Contents
 
-![screenshot-large](http://i.imgur.com/X7Sss.png)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+  - [Browser Installation](#browser-installation)
+  - [Package Manager Installation](#package-manager-installation)
+  - [Manual Installation](#manual-installation)
+- [Usage](#usage)
+- [Screenshots](#screenshots)
+- [Development](#development)
+- [Translation](#translation)
+- [Deployment](#deployment)
+- [Authors](#authors)
+- [License](#license)
+- [Fork Information](#fork-information)
 
-### Installation
+## Prerequisites
 
-#### Prerequisites
+This extension requires GNOME Shell 45 or later. For earlier versions, please see the `pre-45` git branch.
 
-This extension [requires GNOME Shell v3.26 or later](https://github.com/paradoxxxzero/gnome-shell-system-monitor-applet/blob/master/system-monitor%40paradoxxx.zero.gmail.com/metadata.json#L2).
+Before installing, ensure you have the necessary system packages (note that if you're installing [via a package manager](#package-manager-installation), you may not need to manually install these packages):
 
-Before installing this extension, ensure you have the necessary system packages installed:
+- Ubuntu/Debian:
+  ```
+  sudo apt install gir1.2-gtop-2.0 gir1.2-nm-1.0 gir1.2-clutter-1.0 gnome-system-monitor
+  ```
 
-* On Ubuntu:
+- Fedora:
+  ```
+  sudo dnf install libgtop2-devel NetworkManager-libnm-devel gnome-system-monitor
+  ```
 
-      sudo apt install gir1.2-gtop-2.0 gir1.2-nm-1.0 gir1.2-clutter-1.0 gnome-system-monitor
+- Arch Linux:
+  ```
+  sudo pacman -S libgtop gnome-system-monitor clutter
+  ```
 
-* On Debian:
+- openSUSE (Leap 42.1):
+  ```
+  sudo zypper install gnome-shell-devel libgtop-devel libgtop-2_0-10 gnome-system-monitor
+  ```
 
-      sudo apt install gir1.2-gtop-2.0 gir1.2-nm-1.0 gir1.2-clutter-1.0 gnome-system-monitor
+- Mageia 64-bit:
+  ```
+  sudo urpmi lib64gtop-gir2.0 lib64nm-gir1.0 lib64clutter-gir1.0 gnome-system-monitor
+  ```
+  or
+  ```
+  sudo dnf install lib64gtop-gir2.0 lib64nm-gir1.0 lib64clutter-gir1.0 gnome-system-monitor
+  ```
 
-* On Fedora:
+- NixOS:
+  Add to your `configuration.nix`:
+  ```nix
+  environment.variables = {
+      GI_TYPELIB_PATH = "/run/current-system/sw/lib/girepository-1.0";
+  };
+  environment.systemPackages = with pkgs; [
+      libgtop
+      gtop
+  ];
+  ```
 
-      sudo dnf install libgtop2-devel NetworkManager-libnm-devel gnome-system-monitor
+For NVIDIA graphics card memory monitoring, install `nvidia-smi`.
 
-* On Arch Linux:
+For reliable thermal and fan monitoring (especially with multiple sensors of the same type, e.g. dual NVMe drives), install `lm-sensors` (`lm_sensors` on some distros). Without it, the extension falls back to direct sysfs enumeration which may not distinguish identically-named sensors.
 
-      sudo pacman -S libgtop networkmanager gnome-system-monitor clutter
+## Installation
 
-* On openSUSE (Leap 42.1):
+There are three ways to install this extension: via the browser, via a package manager, or manually.
 
-      sudo zypper install gnome-shell-devel libgtop-devel libgtop-2_0-10 gnome-system-monitor
+### Browser Installation
 
-* On Mageia 64-bit (just remove "64" on i586):
+1. If you haven't done so already, install the [gnome-browser-connector](https://gnome.pages.gitlab.gnome.org/gnome-browser-integration/pages/installation-guide.html) package using your distro's package manager, as well as the GNOME Shell integration browser extension for [Firefox](https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/) or [Chrome](https://chrome.google.com/webstore/detail/gnome-shell-integration/gphhapmejobijbbhgpjhcjognlahblep). If you've already installed other GNOME Shell extensions from extensions.gnome.org, you can skip this step.
+2. Visit [the system-monitor-next page on extensions.gnome.org](https://extensions.gnome.org/extension/3010/system-monitor-next/).
+3. Click the toggle button next to the extension's name to install.
 
-      sudo urpmi lib64gtop-gir2.0 lib64nm-gir1.0 lib64clutter-gir1.0 gnome-system-monitor
+If the installation was successful, the toggle button should now show "ON". If it failed (or if you see an error message like "Meta is null" in the GNOME Extensions app), please ensure that you have installed all of the [prerequisites](#prerequisites), that you have restarted GNOME Shell, and that your GNOME Shell version is supported.
 
-    or
+### Package Manager Installation
 
-      sudo dnf install lib64gtop-gir2.0 lib64nm-gir1.0 lib64clutter-gir1.0 gnome-system-monitor
+This extension is available in the repositories of several distributions for any users who prefer to leave extension updates to their package manager:
 
+- **Fedora**: `dnf install gnome-shell-extension-system-monitor-applet`
+- **Arch (AUR)**: `yay gnome-shell-extension-system-monitor-next-git`
 
-Additionally, if you have an NVIDIA graphics card, and want to monitor its memory usage, you'll need to install `nvidia-smi`.
+After installation, the extension will be available for enabling in GNOME Extensions app.
 
-For the browser installation (recommended), you will need the GNOME Shell integration browser extension for
-[Chrome](https://chrome.google.com/webstore/detail/gnome-shell-integration/gphhapmejobijbbhgpjhcjognlahblep),
-[Firefox](https://addons.mozilla.org/en-US/firefox/addon/gnome-shell-integration/) or
-[Opera](https://addons.opera.com/en/extensions/details/gnome-shell-integration/).
+*(Note for maintainers: if your distro is not listed here please feel free to open an issue or drop a PR!)*
 
-Note: If you're using Firefox 52 or later, [you will also need to install `chrome-gnome-shell`](https://blogs.gnome.org/ne0sight/2016/12/25/how-to-install-gnome-shell-extensions-with-firefox-52/).
-The instructions are available [on the GNOME wiki](https://wiki.gnome.org/Projects/GnomeShellIntegrationForChrome/Installation#Ubuntu_Linux).
+### Manual Installation
 
-#### Browser installation
+1. Clone the repository:
+   ```
+   git clone https://github.com/mgalgs/gnome-shell-system-monitor-next-applet.git
+   ```
+2. Install:
+   ```
+   cd gnome-shell-system-monitor-next-applet
+   make install
+   ```
+3. Reload GNOME Shell:
+   - X11: Press `Alt+F2`, type `r`, press Enter
+   - Wayland: Log out and log back in
+4. Enable the extension:
+   ```
+   gnome-extensions enable system-monitor-next@paradoxxx.zero.gmail.com
+   ```
 
-It's recommended you install the extension via the Gnome Shell Extensions website.
+Now you can hack away on the extension in your clone of the repo and test
+your changes by running:
 
-Visit [this extension's page on extensions.gnome.org](https://extensions.gnome.org/extension/120/system-monitor/),
-preferably in Firefox, and install by clicking the toggle button next to the extension's name.
+    make uninstall install
 
-If the install was successful, the toggle button should now show "ON".
-If it failed, ensure that you installed all the [necessary dependencies](#prerequisites),
-and that you granted the browser permission to install extensions when prompted.
-Additionally, rebooting gnome-shell may help (type `Alt + F2` and input `r` in the prompt), but it won't work with Wayland.
+and reloading GNOME Shell.
 
-#### Repository installation
+## Usage
 
-* Extension is in Fedora onwards (up to Fedora 33, last update) and Rawhide repositories, you can install it for all users with the following command:
+After installation, the system monitor will appear in your top panel. You can configure its appearance and behavior through the GNOME Extensions app or by clicking on the panel and selecting "Preferences".
 
-      sudo dnf install gnome-shell-extension-system-monitor-applet
+You can also graph your own custom metrics using the Prometheus monitor and a simple script — see [Custom Metrics](docs/widget-authoring.md#custom-metrics-no-code-changes) for details.
 
-* Enable it with `gnome-tweak-tool` or `gnome-shell-extension-tool --enable-extension=system-monitor@paradoxxx.zero.gmail.com`
+## Screenshots
 
-#### Manual installation
+### Standard View
+![Standard View](screenshots/standard.png)
 
-[Download the ZIP/Tarball](https://github.com/paradoxxxzero/gnome-shell-system-monitor-applet/releases),
-extract the archive, open a shell into its directory, and run:
+### Expanded View
+![Expanded View](screenshots/expanded-wide.png)
 
-    make install
+## Development
 
-Alternately, if you plan on doing development on the extension, or testing modifications, it's advised you checkout the Git repository and install a symlink. First, install git if you don't have it: (`sudo apt-get install git-core`, `sudo pacman -S git`, etc.), then run:
+### Manual Installation for Development
 
-    GIT_PROJECTS=~/git_projects
-    PROJECT_NAME=gnome-shell-system-monitor-applet
-    mkdir $GIT_PROJECTS
-    cd $GIT_PROJECTS
-    git clone git://github.com/paradoxxxzero/gnome-shell-system-monitor-applet.git $PROJECT_NAME
-    mkdir -p ~/.local/share/gnome-shell/extensions
-    cd ~/.local/share/gnome-shell/extensions
-    { [ -d "./$PROJECT_NAME" ] || [ -L "./$PROJECT_NAME" ]; } && rm -Rf "./$PROJECT_NAME"
-    ln -s $GIT_PROJECTS/gnome-shell-system-monitor-applet/$PROJECT_NAME
-    gnome-shell-extension-tool --enable-extension=$PROJECT_NAME
-    gnome-extensions enable system-monitor@paradoxxx.zero.gmail.com
+To work on the extension, you'll need to clone and locally install it from your cloned repository as described in the [Manual Installation](#manual-installation) section above.
 
-And reload GNOME Shell (`Alt + F2`, then `r`) or restart your GNOME session if you are using Wayland.
+### Developing under X11
 
-On openSUSE you need to install a devel package that provides the `gnome-shell-extension-tool` command:
+For X11 sessions, you can easily reload GNOME Shell after making changes:
 
-    sudo zypper install gnome-shell-devel
+1. Press `Alt+F2`
+2. Type `r` and press Enter
 
-### Development
+This will restart GNOME Shell, allowing you to see your changes immediately.
 
-#### Translation
+### Developing under Wayland
 
-If we do not have the translation for your language and you want to translate it by yourself, please make a fork, add your `po/<YOUR_LANG>/system-monitor-applet.po` file, and make a pull request.
+On Gnome Shell 49 and later, you need to install `mutter-devkit` (`mutter-devkit` on
+Arch, `mutter-devel` on Fedora).
 
-#### Testing
+Wayland currently doesn't have a way to reload GNOME Shell, so you'll need to log out and log back in. This is a bit of a pain, so you can use Wayland's "nested sessions" feature to avoid constant logging out and in:
 
-Testing can be done on your native Linux environment using the install instructions above, or through Docker.
+1. Start a nested session (depending on your Gnome Shell version):
+   ```
+   dbus-run-session -- gnome-shell --devkit  # Gnome Shell 49+
+   dbus-run-session -- gnome-shell --nested --wayland  # pre-Gnome-Shell 49
+   ```
+2. Start a new terminal *inside* the nested session. Don't panic if the terminal appears outside the nested window - the dbus session address will be configured to point at the nested session.
+3. In this new terminal, enable the extension:
+   ```
+   gnome-extensions enable system-monitor-next@paradoxxx.zero.gmail.com
+   ```
 
-To build and run a Docker image:
+You might also need to enable the extension using the GNOME Extensions app inside your nested session.
 
-    ./build-docker.sh
-    ./run-docker.sh
+To capture debug logs and set a custom screen size for the nested session:
 
-To connect to the container's desktop through VNC:
+```
+G_MESSAGES_DEBUG=all MUTTER_DEBUG_DUMMY_MODE_SPECS=1366x768 dbus-run-session -- gnome-shell --nested --wayland |& tee /tmp/logs.txt
+```
 
-    ./open-docker.sh
+### VM-Based Functional Testing
 
-Once logged in, you'll still need to manually enable the extension by open the Gnome Tweaks tool.
+For automated testing across multiple GNOME Shell versions, the project includes a VM test harness that creates isolated Fedora/Ubuntu VMs from cloud images, deploys the extension, and captures screenshots and logs.
 
-Afterwards, when you're done testing, you can destroy the container with:
+**Prerequisites:** `libvirt`, `qemu`, `virt-install`, `passt`, `genisoimage`, `imagemagick`
 
-    ./close-docker.sh
+```bash
+# One-time setup (~10 min, cached after)
+make vm-create VM=gssmn-fedora42
 
-#### Deployment
-    
-1. To create a ZIP file with the specified version number, ready to upload to [GNOME Shell Extensions](https://extensions.gnome.org/) or similar repository, run:
+# Day-to-day workflow
+make vm-list                      # Show VMs and their status
+make vm-start VM=gssmn-fedora42   # Boot a VM
+make vm-test VM=gssmn-fedora42    # Deploy + smoke test
+make vm-viewer VM=gssmn-fedora42  # Open interactive graphical session
+make vm-ssh VM=gssmn-fedora42     # SSH into the VM
+make vm-stop VM=gssmn-fedora42    # Shut down when done
 
-    make zip-file VERSION=<version>
+# Push monitor configs for visual testing
+./testing/vm/vm-config.sh --vm gssmn-fedora42 --preset all-visible --screenshot
+./testing/vm/vm-config.sh --list-presets
 
-To determine the version number to use, check the extensions site and increment from the largest published version.
+# Full matrix test with before/after comparison
+make vm-test-all LABEL=master-baseline
+make vm-test-all LABEL=my-feature BASELINE=master-baseline
+```
 
-The specified version number is just for documentation and isn't strictly necessary in the uploaded file, since the extensions website will dynamically set this and override whatever we enter.
+VMs are created once and reused across sessions — just start/stop as needed.
 
-2. Once uploaded, [create a GitHub release](https://github.com/paradoxxxzero/gnome-shell-system-monitor-applet/releases) with the same version number.
+See [`testing/vm/README.md`](testing/vm/README.md) for detailed usage, architecture, and available options.
 
-### Authors
+## Translation
 
-[paradoxxxzero](https://github.com/paradoxxxzero)
-[yuyichao](https://github.com/yuyichao)
-[darkxst](https://github.com/darkxst)
-and [many contributors](https://github.com/paradoxxxzero/gnome-shell-system-monitor-applet/contributors)
+To contribute a translation:
+1. Fork the repository
+2. Add/update your `po/<YOUR_LANG>/system-monitor-applet.po` file
+3. Submit a pull request
+4. Drink water
 
-### License
+## Deployment
 
-Copyright (C) 2011 Florian Mounier aka paradoxxxzero
+To create a ZIP file for upload to GNOME Shell Extensions:
+
+```
+make zip-file
+```
+
+This process used to be automated by [the uploader Github Action](actions/uploader)
+but has since been disabled since it required user credentials to be saved in the
+repo secrets. The `gnome-extensions` tool [has recently gained an `upload`
+subcommand](https://gjs.guide/extensions/upgrading/gnome-shell-49.html#extension-tools)
+(which could be used in place of the upload.py Python script), but it still requires
+username and password to be present in the repo secrets, so is likely still not a
+good option for a CI-based solution (more research on this is required).
+
+## Authors
+
+- [paradoxxxzero](https://github.com/paradoxxxzero)
+- [mgalgs](https://github.com/mgalgs)
+- [yuyichao](https://github.com/yuyichao)
+- [darkxst](https://github.com/darkxst)
+- [And many contributors](https://github.com/mgalgs/gnome-shell-system-monitor-next-applet/contributors)
+
+## License
+
+Copyright (C) 2011-2024 Florian Mounier aka paradoxxxzero and contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -167,3 +256,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+## Fork Information
+
+This repository was originally forked from `paradoxxxzero/gnome-shell-system-monitor-applet` for packaging purposes, aiming to maintain a continuously updated release on [extensions.gnome.org](https://extensions.gnome.org/extension/3010/system-monitor-next/). As the upstream repository appears to be unmaintained, this is now a full and proper fork.
